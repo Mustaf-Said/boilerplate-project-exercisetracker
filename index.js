@@ -16,7 +16,7 @@ const ExerciseSchema = new Schema({
   user_id: { type: String, required: true },
   description: String,
   duration: Number,
-  date: Date.toDateString(),
+  date: Date
 });
 const Exercise = mongoose.model("Exercise", ExerciseSchema);
 
@@ -64,7 +64,7 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
         user_id: user._id,
         description,
         duration,
-        date: date ? new Date(date) : new Date(),
+        date: date ? new Date(date).toDateString() : new Date().toDateString(),
       });
       const exercise = await exerciseObj.save();
       res.json({
@@ -91,10 +91,10 @@ app.get("/api/users/:_id/logs", async (req, res) => {
   }
   let dateObj = {};
   if (from) {
-    dateObj["$gte"] = new Date(from);
+    dateObj["$gte"] = new Date(from).toDateString();
   }
   if (to) {
-    dateObj["$lte"] = new Date(to);
+    dateObj["$lte"] = new Date(to).toDateString();
   }
   let filter = {
     user_id: id,
