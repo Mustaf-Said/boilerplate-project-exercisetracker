@@ -16,7 +16,7 @@ const ExerciseSchema = new Schema({
   user_id: { type: String, required: true },
   description: String,
   duration: Number,
-  date: Date
+  date: Date,
 });
 const Exercise = mongoose.model("Exercise", ExerciseSchema);
 
@@ -64,8 +64,13 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
         user_id: user._id,
         description,
         duration,
-        date: date ? new Date(date).toDateString() : new Date().toDateString(),
+        date: date ? new Date(date) : new Date(),
       });
+      //lagt extra code
+      if (date && isNaN(new Date(date))) {
+        return res.status(400).send("Invalid date format");
+      }
+
       const exercise = await exerciseObj.save();
       res.json({
         _id: user._id,
@@ -91,17 +96,21 @@ app.get("/api/users/:_id/logs", async (req, res) => {
   }
   let dateObj = {};
   if (from) {
-    dateObj["$gte"] = new Date(from).toDateString();
+    dateObj["$gte"] = new Date(from);
   }
   if (to) {
-    dateObj["$lte"] = new Date(to).toDateString();
+    dateObj["$lte"] = new Date(to);
   }
-  let filter = {
+  /* let filter = {
     user_id: id,
   };
   if (from || to) {
     filter.date = dateObj;
-  }
+  } */
+  const filter = {
+    user_id: id,
+    ...(from || to ? { date: dateObj } : {}),
+  };
 
   const exercises = await Exercise.find(filter).limit(+limit ?? 500);
 
